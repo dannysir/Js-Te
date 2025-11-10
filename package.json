@@ -4,6 +4,9 @@
   "type": "module",
   "description": "JavaScript test library",
   "main": "index.js",
+  "bin": {
+    "js-te": "./bin/cli.js"
+  },
   "scripts": {
     "test": "node bin/cli.js"
   },

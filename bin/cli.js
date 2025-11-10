@@ -2,7 +2,11 @@
 
 import fs from 'fs';
 import path from 'path';
-import {run} from "../index.js";
+import * as jsTe from '../index.js';
+
+Object.keys(jsTe).forEach(key => {
+  global[key] = jsTe[key];
+});
 
 function findTestFiles(dir) {
   const files = [];
@@ -14,6 +18,8 @@ function findTestFiles(dir) {
     const isTestDir = dirName === 'test' || inTestDir;
 
     for (const item of items) {
+      if (item === 'node_modules') continue;
+
       const fullPath = path.join(directory, item);
       const stat = fs.statSync(fullPath);
 
@@ -39,4 +45,4 @@ for (const file of testFiles) {
   await import(path.resolve(file));
 }
 
-run();
+jsTe.run();
