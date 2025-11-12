@@ -22,4 +22,9 @@ export class Tests {
   getTests() {
     return [...this.#tests];
   }
+
+  clearTests() {
+    this.#tests = [];
+    this.#testDepth = [];
+  }
 }

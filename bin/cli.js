@@ -3,6 +3,10 @@
 import fs from 'fs';
 import path from 'path';
 import * as jsTe from '../index.js';
+import {bold, green, red, yellow} from "../utils/consoleColor.js";
+
+let totalPassed = 0;
+let totalFailed = 0;
 
 Object.keys(jsTe).forEach(key => {
   global[key] = jsTe[key];
@@ -39,10 +43,20 @@ function findTestFiles(dir) {
 
 const testFiles = findTestFiles(process.cwd());
 
-console.log(`Found ${testFiles.length} test file(s)\n`);
+console.log(`Found ${green(testFiles.length)} test file(s)`);
 
 for (const file of testFiles) {
+  console.log(`\n${yellow(file)}\n`);
+
   await import(path.resolve(file));
+
+  const {passed, failed} = await jsTe.run();
+  totalPassed += passed;
+  totalFailed += failed;
 }
 
-jsTe.run();
+console.log(`\nTotal Result: ${green(totalPassed + ' passed')}, ${red(totalFailed + ' failed')}, ${bold(totalPassed + totalFailed + ' total')}\n`);
+
+if (totalFailed > 0) {
+  process.exit(1);
+}
