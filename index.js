@@ -2,8 +2,6 @@ import {
   CHECK,
   CROSS, DEFAULT_COUNT, DIRECTORY_DELIMITER, EMPTY,
   getErrorMsg,
-  getTestResultMsg,
-  RUNNING_TEST_MSG
 } from "./constants.js";
 import {Tests} from "./src/tests.js";
 import {bold, green, red} from "./utils/consoleColor.js";
@@ -14,40 +12,55 @@ export const test = (description, fn) => tests.test(description, fn);
 
 export const describe = (suiteName, fn) => tests.describe(suiteName, fn);
 
-export function expect(actual) {
+export const expect = (actual) => {
   let value = actual;
-  if (typeof actual === 'function') {
-    try {
+
+  const runArgFnc = (actual) => {
+    let value = actual;
+    if (typeof actual === 'function') {
       value = actual();
-    } catch (error) {
-      throw error;
     }
-  }
+    return value;
+  };
 
   return {
     toBe(expected) {
+      value = runArgFnc(actual);
       if (value !== expected) {
         throw new Error(getErrorMsg(expected, value));
       }
     },
     toEqual(expected) {
+      value = runArgFnc(actual);
       if (JSON.stringify(value) !== JSON.stringify(expected)) {
         throw new Error(getErrorMsg(expected, value));
       }
     },
     toThrow(expected) {
-
+      try {
+        value = runArgFnc(actual);
+      }catch (e) {
+        if (!e.message.includes(expected)) {
+          throw new Error(getErrorMsg(expected, e.message));
+        }else return;
+      }
     },
     toBeTruthy() {
-
+      value = runArgFnc(actual);
+      if (!value) {
+        throw new Error(getErrorMsg(true, value));
+      }
     },
     toBeFalsy() {
-
+      value = runArgFnc(actual);
+      if (value) {
+        throw new Error(getErrorMsg(true, value));
+      }
     },
   };
 }
 
-export async function run() {
+export const run = async () => {
   let passed = DEFAULT_COUNT;
   let failed = DEFAULT_COUNT;
 
