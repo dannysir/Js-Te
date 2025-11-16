@@ -1,4 +1,4 @@
-import {describe, expect, test} from "../index.js";
+import {describe, expect, isMocked, mock, test} from "../index.js";
 
 describe('[describe depth test] - 1단계', () => {
   describe('2단계', () => {
@@ -18,4 +18,12 @@ describe('[function return test] - expect arg', () => {
       throw new Error('ERROR');
     }).toThrow('ERROR');
   });
+});
+
+test('[mocking] - mocking random function', async () => {
+  mock('/src/test-helper/random.js', {
+    random: () => 3,
+  });
+  const {play} = await import('../src/test-helper/game.js');
+  expect(play()).toBe(30);
 });

@@ -4,6 +4,10 @@
   "type": "module",
   "description": "JavaScript test library",
   "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./src/mock/store.js": "./src/mock/store.js"
+  },
   "bin": {
     "js-te": "./bin/cli.js"
   },
@@ -23,5 +27,11 @@
   "bugs": {
     "url": "https://github.com/dannysir/Js-Te/issues"
   },
-  "homepage": "https://github.com/dannysir/Js-Te#readme"
+  "homepage": "https://github.com/dannysir/Js-Te#readme",
+  "dependencies": {
+    "@babel/core": "^7.28.5",
+    "@babel/generator": "^7.28.5",
+    "@babel/parser": "^7.28.5",
+    "@babel/traverse": "^7.28.5"
+  }
 }
