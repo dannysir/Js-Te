@@ -1,5 +1,5 @@
 {
-  "name": "js-te",
+  "name": "@dannysir/js-te",
   "version": "0.0.1",
   "type": "module",
   "description": "JavaScript test library",
