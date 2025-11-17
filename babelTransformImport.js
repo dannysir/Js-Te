@@ -7,7 +7,7 @@ export const babelTransformImport = ({types: t}) => {
             t.identifier('__mockRegistry__'),
             t.identifier('__mockRegistry__')
           )],
-          t.stringLiteral('js-te/src/mock/store.js')
+          t.stringLiteral('@dannysir/js-te/src/mock/store.js')
         );
         path.node.body.unshift(importStatement);
       },
@@ -15,7 +15,7 @@ export const babelTransformImport = ({types: t}) => {
       ImportDeclaration(path) {
         const source = path.node.source.value;
 
-        if (source === 'js-te/src/mock/store.js') {
+        if (source === '@dannysir/js-te/src/mock/store.js') {
           return;
         }
 
