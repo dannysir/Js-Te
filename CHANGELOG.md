@@ -21,6 +21,12 @@
 - 중첩 describe 블록 지원
 - 컬러 콘솔 출력
 
+## [0.0.2] - 2025-11-17
+
+### 추가
+- scoped 패키지로 변경하여 발생한 버그 수정
+  - babelTransformImport 파일 내에 `js-te` 경로를 `@dannysir/js-te` 경로로 변경
+
 ---
 
 ## 앞으로 추가할 기능
