@@ -12,6 +12,7 @@ const tests = new Tests();
 export { mock, clearAllMocks, unmock, isMocked } from './src/mock/store.js';
 
 export const test = (description, fn) => tests.test(description, fn);
+test.each = (cases) => tests.testEach(cases);
 
 export const describe = (suiteName, fn) => tests.describe(suiteName, fn);
 
