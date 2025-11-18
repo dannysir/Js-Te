@@ -1,4 +1,4 @@
-import {describe, expect, isMocked, mock, test} from "../index.js";
+import {beforeEach, describe, expect, isMocked, mock, test} from "../index.js";
 
 describe('[describe depth test] - 1단계', () => {
   describe('2단계', () => {
@@ -41,4 +41,29 @@ test.each([
   [{ name : 'dannysir', age : null}],
 ])('[each test placeholder] - input : %o', (arg) => {
   expect(arg.name).toBe('dannysir');
+});
+
+describe('[beforeEach test]', () => {
+  let counter;
+  beforeEach(() => {
+    counter = 0;
+  });
+
+  test('counter init', () => {
+    expect(counter + 10).toBe(10);
+  });
+
+  describe('add beforeEach', () => {
+    beforeEach(() => {
+      counter = 10;
+    });
+
+    test('counter is 10', () => {
+      expect(counter).toBe(10);
+    });
+  });
+
+  test('outer test counter is 0', () => {
+    expect(counter).toBe(0);
+  });
 });
