@@ -16,6 +16,8 @@ test.each = (cases) => tests.testEach(cases);
 
 export const describe = (suiteName, fn) => tests.describe(suiteName, fn);
 
+export const beforeEach = (fn) => tests.beforeEach(fn);
+
 export const expect = (actual) => {
   let value = actual;
 

@@ -3,17 +3,27 @@ import {DIRECTORY_DELIMITER} from "../constants.js";
 export class Tests {
   #tests = [];
   #testDepth = [];
+  #beforeEachArr = [];
 
   describe(str, fn) {
     this.#testDepth.push(str);
+    const prevLength = this.#beforeEachArr.length;
     fn();
+    this.#beforeEachArr.length = prevLength;
     this.#testDepth.pop();
   }
 
   test(description, fn) {
+    const beforeEachHooks = [...this.#beforeEachArr];
+
     const testObj = {
       description,
-      fn,
+      fn: async () => {
+        for (const hook of beforeEachHooks) {
+          await hook();
+        }
+        fn();
+      },
       path: this.#testDepth.join(DIRECTORY_DELIMITER),
     }
     this.#tests.push(testObj);
@@ -28,6 +38,10 @@ export class Tests {
     };
   }
 
+  beforeEach(fn) {
+    this.#beforeEachArr.push(fn);
+  }
+
   getTests() {
     return [...this.#tests];
   }
@@ -35,6 +49,7 @@ export class Tests {
   clearTests() {
     this.#tests = [];
     this.#testDepth = [];
+    this.#beforeEachArr = [];
   }
 
   #formatDescription(args, description) {
