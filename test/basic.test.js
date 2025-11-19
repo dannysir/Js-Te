@@ -21,7 +21,7 @@ describe('[function return test] - expect arg', () => {
 });
 
 test('[mocking] - mocking random function', async () => {
-  mock('/src/test-helper/random.js', {
+  mock('/Users/san/Js-Te/src/test-helper/random.js', {
     random: () => 3,
   });
   const {play} = await import('../src/test-helper/game.js');

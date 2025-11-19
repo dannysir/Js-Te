@@ -6,6 +6,7 @@ import {
 import {Tests} from "./src/tests.js";
 import {green, red} from "./utils/consoleColor.js";
 import {getTestResultMsg} from "./utils/makeMessage.js";
+import {clearAllMocks} from "./src/mock/store.js";
 
 const tests = new Tests();
 
@@ -76,6 +77,7 @@ export const run = async () => {
       const directoryString = green(CHECK) + (test.path === '' ? EMPTY : test.path + DIRECTORY_DELIMITER) + test.description
       console.log(directoryString);
       passed++;
+      clearAllMocks();
     } catch (error) {
       const errorDirectory = red(CROSS) + test.path + test.description
       console.log(errorDirectory);

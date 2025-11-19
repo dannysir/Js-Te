@@ -22,7 +22,7 @@ export class Tests {
         for (const hook of beforeEachHooks) {
           await hook();
         }
-        fn();
+        await fn();
       },
       path: this.#testDepth.join(DIRECTORY_DELIMITER),
     }
