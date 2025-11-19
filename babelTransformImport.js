@@ -1,44 +1,53 @@
+import path from 'path';
+import {BABEL, MOCK} from "./constants.js";
+
 export const babelTransformImport = ({types: t}) => {
   return {
     visitor: {
       Program(path) {
         const importStatement = t.ImportDeclaration(
           [t.importSpecifier(
-            t.identifier('__mockRegistry__'),
-            t.identifier('__mockRegistry__')
+            t.identifier(MOCK.STORE_NAME),
+            t.identifier(MOCK.STORE_NAME)
           )],
-          t.stringLiteral('@dannysir/js-te/src/mock/store.js')
+          t.stringLiteral(MOCK.STORE_PATH)
         );
         path.node.body.unshift(importStatement);
       },
 
-      ImportDeclaration(path) {
-        const source = path.node.source.value;
+      ImportDeclaration(nodePath, state) {
+        const source = nodePath.node.source.value;
 
-        if (source === '@dannysir/js-te/src/mock/store.js') {
+        if (source === MOCK.STORE_PATH) {
           return;
         }
 
-        const specifiers = path.node.specifiers;
+        const currentFilePath = state.filename || process.cwd();
+        const currentDir = path.dirname(currentFilePath);
 
-        // 1. 먼저 모듈을 한 번만 가져오기 (mock이면 mock, 아니면 실제)
-        const moduleVarName = path.scope.generateUidIdentifier('module');
+        let absolutePath;
+        if (source.startsWith(BABEL.PERIOD)) {
+          absolutePath = path.resolve(currentDir, source);
+        } else {
+          absolutePath = source;
+        }
 
-        const moduleDeclaration = t.variableDeclaration('const', [
+        const specifiers = nodePath.node.specifiers;
+
+        const moduleVarName = nodePath.scope.generateUidIdentifier(BABEL.MODULE);
+
+        const moduleDeclaration = t.variableDeclaration(BABEL.CONST, [
           t.variableDeclarator(
             moduleVarName,
             t.conditionalExpression(
-              // 조건: __mockRegistry__.has(source)
               t.callExpression(
-                t.memberExpression(t.identifier('__mockRegistry__'), t.identifier('has')),
-                [t.stringLiteral(source)]
+                t.memberExpression(t.identifier(MOCK.STORE_NAME), t.identifier(BABEL.HAS)),
+                [t.stringLiteral(absolutePath)]
               ),
-              // true: mock 반환
               t.callExpression(
-                t.memberExpression(t.identifier('__mockRegistry__'), t.identifier('get')),
-                [t.stringLiteral(source)]
+                t.memberExpression(t.identifier(MOCK.STORE_NAME), t.identifier(BABEL.GET)),
+                [t.stringLiteral(absolutePath)]
               ),
-              // false: 실제 import
               t.awaitExpression(
                 t.importExpression(t.stringLiteral(source))
               )
@@ -46,7 +55,6 @@ export const babelTransformImport = ({types: t}) => {
           )
         ]);
 
-        // 2. 각 specifier를 moduleVarName에서 추출
         const extractDeclarations = specifiers.map(spec => {
           let importedName, localName;
 
@@ -55,7 +63,6 @@ export const babelTransformImport = ({types: t}) => {
             localName = spec.local.name;
           } else if (t.isImportNamespaceSpecifier(spec)) {
             localName = spec.local.name;
-            // namespace import는 전체 모듈
             return t.variableDeclarator(
               t.identifier(localName),
               moduleVarName
@@ -71,9 +78,9 @@ export const babelTransformImport = ({types: t}) => {
           );
         });
 
-        const extractDeclaration = t.variableDeclaration('const', extractDeclarations);
+        const extractDeclaration = t.variableDeclaration(BABEL.CONST, extractDeclarations);
 
-        path.replaceWithMultiple([moduleDeclaration, extractDeclaration]);
+        nodePath.replaceWithMultiple([moduleDeclaration, extractDeclaration]);
       }
     }
   };
