@@ -6,7 +6,7 @@ import {transformSync} from '@babel/core';
 import * as jsTe from '../index.js';
 import {green, yellow} from "../utils/consoleColor.js";
 import {getTestResultMsg} from "../utils/makeMessage.js";
-import {RESULT_TITLE} from "../constants.js";
+import {BABEL, PATH, RESULT_TITLE} from "../constants.js";
 import { babelTransformImport } from '../babelTransformImport.js';
 
 let totalPassed = 0;
@@ -25,7 +25,7 @@ const transformFile = (filePath) => {
     filename: filePath,
     plugins: [babelTransformImport],
     parserOpts: {
-      sourceType: 'module',
+      sourceType: BABEL.MODULE,
       plugins: ['dynamicImport']
     }
   });
@@ -46,18 +46,18 @@ const findTestFiles = (dir) => {
     const items = fs.readdirSync(directory);
     const dirName = path.basename(directory);
 
-    const isTestDir = dirName === 'test' || inTestDir;
+    const isTestDir = dirName === PATH.TEST_DIRECTORY || inTestDir;
 
     for (const item of items) {
-      if (item === 'node_modules') continue;
+      if (item === PATH.NODE_MODULES) continue;
 
       const fullPath = path.join(directory, item);
       const stat = fs.statSync(fullPath);
 
       if (stat.isDirectory()) {
         walk(fullPath, isTestDir);
-      } else if (item.endsWith('.test.js') || isTestDir) {
-        if (item.endsWith('.js')) {
+      } else if (item.endsWith(PATH.TEST_FILE) || isTestDir) {
+        if (item.endsWith(PATH.JAVASCRIPT_FILE)) {
           files.push(fullPath);
         }
       }
@@ -75,14 +75,14 @@ const findAllSourceFiles = (dir) => {
     const items = fs.readdirSync(directory);
 
     for (const item of items) {
-      if (item === 'node_modules' || item === 'bin' || item === 'test') continue;
+      if (item === PATH.NODE_MODULES || item === PATH.BIN || item === PATH.TEST_DIRECTORY) continue;
 
       const fullPath = path.join(directory, item);
       const stat = fs.statSync(fullPath);
 
       if (stat.isDirectory()) {
         walk(fullPath);
-      } else if (item.endsWith('.js') && !item.endsWith('.test.js')) {
+      } else if (item.endsWith(PATH.JAVASCRIPT_FILE) && !item.endsWith(PATH.TEST_FILE)) {
         files.push(fullPath);
       }
     }

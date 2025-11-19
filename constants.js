@@ -26,3 +26,25 @@ export const COLORS = {
   gray: '\x1b[90m',
   bold: '\x1b[1m'
 };
+
+export const MOCK = {
+  STORE_NAME: 'mockStore',
+  STORE_PATH : '@dannysir/js-te/src/mock/store.js'
+};
+
+export const BABEL = {
+  MODULE: 'module',
+  CONST: 'const',
+  HAS: 'has',
+  GET: 'get',
+  PERIOD: '.',
+};
+
+export const PATH = {
+  NODE_MODULES: 'node_modules',
+  TEST_DIRECTORY: 'test',
+  TEST_FILE: '.test.js',
+  JAVASCRIPT_FILE: '.js',
+  BIN: 'bin',
+
+};

@@ -1,17 +1,17 @@
-export const __mockRegistry__ = new Map();
+export const mockStore = new Map();
 
 export function clearAllMocks() {
-  __mockRegistry__.clear();
+  mockStore.clear();
 }
 
 export function mock(modulePath, mockExports) {
-  __mockRegistry__.set(modulePath, mockExports);
+  mockStore.set(modulePath, mockExports);
 }
 
 export function unmock(modulePath) {
-  __mockRegistry__.delete(modulePath);
+  mockStore.delete(modulePath);
 }
 
 export function isMocked(modulePath) {
-  return __mockRegistry__.has(modulePath);
+  return mockStore.has(modulePath);
 }
