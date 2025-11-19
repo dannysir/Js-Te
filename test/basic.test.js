@@ -1,4 +1,4 @@
-import {beforeEach, describe, expect, isMocked, mock, test} from "../index.js";
+import {beforeEach, describe, expect, mock, test} from "../index.js";
 
 describe('[describe depth test] - 1단계', () => {
   describe('2단계', () => {
@@ -21,10 +21,10 @@ describe('[function return test] - expect arg', () => {
 });
 
 test('[mocking] - mocking random function', async () => {
-  mock('/Users/san/Js-Te/src/test-helper/random.js', {
+  mock('/Users/san/Js-Te/test-helper/random.js', {
     random: () => 3,
   });
-  const {play} = await import('../src/test-helper/game.js');
+  const {play} = await import('../test-helper/game.js');
   expect(play()).toBe(30);
 });
 
