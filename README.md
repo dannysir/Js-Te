@@ -27,10 +27,12 @@ describe('[단순 연산 테스트]', () => {
 
 ### 2. 테스트 실행
 
-package.json에 추가:
+package.json에 추가.
 
+- type을 module로 설정해주세요.
 ```json
 {
+  "type": "module",
   "scripts": {
     "test": "js-te"
   }
@@ -127,41 +129,40 @@ Babel을 사용해서 import 구문을 변환하여 mock 함수를 가져오도�
    2. `path`를 key로 이용해 Map에 저장
 2. Babel로 코드 변환
    1. 전체 파일의 import문 확인
-   2. import 경로가 Map에 존재하면 mock 객체로 변환
-   3. import 경로가 Map에 없다면 그대로 import
+   2. (0.0.3 버전 추가) import 경로를 **절대 경로**로 변환
+   2. import 경로(절대 경로)가 Map에 존재하면 mock 객체로 변환
+   3. import 경로(절대 경로)가 Map에 없다면 그대로 import
 3. 테스트 실행
 4. 원본 파일 복구
 
-### 🚨 주의 사항 (현재 수정 중)
-
-mocking 기능의 경우 현재 `path`를 기반으로 직접 변환을 하기 때문에 mocking이 필요한 함수의 경우 
-
-반드시 **절대 경로**로 표현한 후 `mock` 함수에 **절대 경로**로 등록을 해주세요.
-
-> 만약 모듈이 사용되는 모든 위치의 path가 동일하다면 상대 경로도 정삭 작동합니다.
-
-### `mock(모듈경로, mock객체)`
+### `mock(모듈 절대 경로), mock객체)`
 
 모듈을 모킹합니다. import 하기 **전에** 호출해야 합니다.
+
+**🚨 주의사항**
+
+1. 반드시 경로는 절대 경로로 입력해주세요.
+   - babel이 import문에서 절대 경로로 변환하여 확인을 하기 때문에 반드시 절대 경로로 등록해주세요.
+2. import문을 반드시 mocking 이후에 선언해주세요.
+   - mocking 전에 import를 하게 되면 mocking되기 전의 모듈을 가져오게 됩니다.
 
 ```javascript
 // random.js
 export const random = () => Math.random();
 
 // game.js
-import { random } from './random.js';
+import { random } from './random.js'; // 자유롭게 import하면 babel에서 절대 경로로 변환하여 판단합니다.
 export const play = () => random() * 10;
 
 // game.test.js
-import { mock, test, expect } from 'js-te';
-
 test('랜덤 함수 모킹', async () => {
   // 1. 먼저 모킹
-  mock('./random.js', {
+  mock('/Users/san/Js-Te/test-helper/random.js', { // 반드시 절대 경로로 등록
     random: () => 0.5
   });
   
   // 2. 그 다음 import
+  // 상단에 import문을 입력할 경우 
   const { play } = await import('./game.js');
   
   // 3. 모킹된 값 사용
@@ -180,6 +181,82 @@ test('랜덤 함수 모킹', async () => {
 ### `isMocked(모듈경로)`
 
 mock이 등록되어 있는지 확인합니다.
+
+## `each(cases)`
+
+`cases`를 배열로 받아 순차적으로 테스트 진행
+
+#### 🚨 주의 사항
+
+`cases`는 반드시 `Array` 타입으로 받아야 합니다.
+
+### 플레이스 홀더
+
+- %s - 문자열/숫자
+- %o - 객체 (JSON.stringify)
+
+```jsx
+test.each([
+  [1, 2, 3, 6],
+  [3, 4, 5, 12],
+  [10, 20, 13, 43],
+  [10, 12, 13, 35],
+])('[each test] - input : %s, %s, %s, %s', (a, b, c, result) => {
+  expect(a + b + c).toBe(result);
+});
+
+/* 출력 결과
+✓ [each test] - input : 1, 2, 3, 6
+✓ [each test] - input : 3, 4, 5, 12
+✓ [each test] - input : 10, 20, 13, 43
+✓ [each test] - input : 10, 12, 13, 35
+ */
+
+test.each([
+  [{ name : 'dannysir', age : null}],
+])('[each test placeholder] - input : %o', (arg) => {
+  expect(arg.name).toBe('dannysir');
+});
+
+/* 출력 결과
+✓ [each test placeholder] - input : {"name":"dannysir","age":null}
+ */
+```
+
+## `beforeEach(함수)`
+
+각 테스트가 진행되기 전에 실행할 함수를 선언합니다.
+
+중첩된 describe에서의 `beforeEach`는 상위 describe의 `beforeEach`를 모두 실행한 후, 자신의 `beforeEach`를 실행합니다.
+
+```jsx
+describe('카운터 테스트', () => {
+  let counter;
+  
+  beforeEach(() => {
+    counter = 0;
+  });
+  
+  test('카운터 증가', () => {
+    counter++;
+    expect(counter).toBe(1);
+  });
+  
+  test('카운터는 0부터 시작', () => {
+    expect(counter).toBe(0);
+  });
+  
+  describe('중첩된 describe', () => {
+    beforeEach(() => {
+      counter = 10;
+    });
+    
+    test('카운터는 10', () => {
+      expect(counter).toBe(10);
+    });
+  });
+});
+```
 
 ## 테스트 파일 찾기 규칙
 
@@ -204,8 +281,6 @@ mock이 등록되어 있는지 확인합니다.
 ### 기본 테스트
 
 ```javascript
-import { describe, test, expect } from 'js-te';
-
 describe('문자열 테스트', () => {
   test('문자열 합치기', () => {
     const result = 'hello' + ' ' + 'world';
@@ -222,10 +297,8 @@ describe('문자열 테스트', () => {
 
 ```javascript
 // mocking.test.js
-import { mock, test, expect } from 'js-te';
-
 test('[mocking] - mocking random function', async () => {
-  mock('/src/test-helper/random.js', {
+  mock('/Users/san/Js-Te/test-helper/random.js', {
     random: () => 3,
   });
   const {play} = await import('../src/test-helper/game.js');
@@ -234,7 +307,7 @@ test('[mocking] - mocking random function', async () => {
 
 
 // game.js
-import {random} from '/src/test-helper/random.js'
+import {random} from '/test-helper/random.js'
 
 export const play = () => {
   return random() * 10;
@@ -242,16 +315,6 @@ export const play = () => {
 
 // random.js
 export const random = () => Math.random();
-```
-
-## 설정
-
-`package.json`에 해당 설정을 하셔야 정상 작동합니다.
-
-```json
-{
-  "type": "module"
-}
 ```
 
 ## 링크
